@@ -1,5 +1,7 @@
 import datetime
 import os.path
+import json
+from models import Event, EventDate
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -30,32 +32,18 @@ def main():
     try:
         service = build("calendar", "v3", credentials=creds)
 
-        event = {
-            'summary': 'Google I/O 2015',
-            'location': '800 Howard St., San Francisco, CA 94103',
-            'description': 'A chance to hear more about Google\'s developer products.',
-            'start': {
-                'dateTime': '2025-05-28T09:00:00',
-                 "timeZone": "Europe/Warsaw"
-            },
-            'end': {
-                'dateTime': '2025-05-28T17:00:00',
-                "timeZone": "Europe/Warsaw"
-            },
-            'recurrence': [
-                'RRULE:FREQ=DAILY;COUNT=2'
-            ],
-            'reminders': {
-                'useDefault': False,
-                'overrides': [
-                    {'method': 'email', 'minutes': 24 * 60},
-                    {'method': 'popup', 'minutes': 10},
-                ],
-            },
-        }
+        event = Event(
+            summary="Google I/O 2015",
+            location="800 Howard St., San Francisco, CA 94103",
+            description="A chance to hear more about Google's developer products.",
+            start=EventDate(date="2020-05-28"),
+            end=EventDate(date="2020-05-29"),
+        )
 
-        event = service.events().insert(calendarId='primary', body=event).execute()
-        print('Event created: %s' % (event.get('htmlLink')))
+        payload = event.to_dict()
+        response = service.events().insert(calendarId='primary', body=payload).execute()
+
+        print('Event created: %s' % (response.get('htmlLink')))
 
     except HttpError as error:
         print(f"An error occurred: {error}")
@@ -63,4 +51,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
