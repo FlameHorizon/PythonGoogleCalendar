@@ -2,6 +2,7 @@ import datetime
 import os.path
 import json
 from models import Event, EventDate
+from parser import Parser
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -31,19 +32,14 @@ def main():
 
     try:
         service = build("calendar", "v3", credentials=creds)
+        events = Parser.get_events('input.md')
 
-        event = Event(
-            summary="Google I/O 2015",
-            location="800 Howard St., San Francisco, CA 94103",
-            description="A chance to hear more about Google's developer products.",
-            start=EventDate(date="2020-05-28"),
-            end=EventDate(date="2020-05-29"),
-        )
+        for ev in events:
+            payload = ev.to_dict()
+            __import__('pprint').pprint(payload)
+            response = service.events().insert(calendarId='primary', body=payload).execute()
 
-        payload = event.to_dict()
-        response = service.events().insert(calendarId='primary', body=payload).execute()
-
-        print('Event created: %s' % (response.get('htmlLink')))
+            print('Event created: %s' % (response.get('htmlLink')))
 
     except HttpError as error:
         print(f"An error occurred: {error}")

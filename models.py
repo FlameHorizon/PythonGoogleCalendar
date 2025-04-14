@@ -4,7 +4,8 @@ import json
 
 @dataclass
 class EventDate:
-    date: str
+    dateTime: str
+    timeZone: str
 
 
 @dataclass
@@ -12,11 +13,8 @@ class Event:
     summary: str
     location: str
     description: str
-    end: EventDate
     start: EventDate
-
-    def to_json(self) -> str:
-        return json.dumps(asdict(self))
+    end: EventDate
 
     def to_dict(self) -> dict:
         return asdict(self)
